@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Bugs ScreenShoter",
+  "version": "0.1.0",
+  "description": "Taking screenshots of bugs and components",
+  "browser_action": {
+    "default_title": "Take a Screenshot"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "permissions": ["desktopCapture", "tabs", "downloads", "activeTab"]
+}
