@@ -1,4 +1,3 @@
-debugger;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.name === "stream" && message.streamId) {
     navigator.mediaDevices
@@ -23,6 +22,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+
+//Add canvas and processing the bitmap 
 function processImage(bitmap) {
   const canvas = document.createElement("canvas");
   canvas.width = bitmap.width; //if not set, the width will default to 200px
@@ -34,6 +35,7 @@ function processImage(bitmap) {
   return base64;
 }
 
+//video tracking and image capture handling
 async function handleScreenshot(stream) {
   const track = stream.getVideoTracks()[0];
   const imageCapture = new ImageCapture(track);
