@@ -1,6 +1,6 @@
+debugger;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.name === "stream" && message.streamId) {
-    let track, canvas;
     navigator.mediaDevices
       .getUserMedia({
         video: {
@@ -10,23 +10,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           },
         },
       })
-      .then((stream) => {
-        track = stream.getVideoTracks()[0];
-        const imageCapture = new ImageCapture(track);
-        return imageCapture.grabFrame();
-      })
-      .then((bitmap) => {
-        track.stop();
-        canvas = document.createElement("canvas");
-        canvas.width = bitmap.width; //if not set, the width will default to 200px
-        canvas.height = bitmap.height; //if not set, the height will default to 200px
-        let context = canvas.getContext("2d");
-        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-        return canvas.toDataURL();
-        //The callback function will stop the stream, create a canvas and draw the ImageBitmap in it, then get the Data Url of the canvas.
-      })
+      .then(handleScreenshot)
+      .then(processImage)
       .then((base64) => {
-        canvas.remove();
         sendResponse({ success: true, base64 });
       })
       .catch((err) => {
@@ -36,3 +22,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+function processImage(bitmap) {
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width; //if not set, the width will default to 200px
+  canvas.height = bitmap.height; //if not set, the height will default to 200px
+  let context = canvas.getContext("2d");
+  context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+  const base64 = canvas.toDataURL();
+  canvas.remove();
+  return base64;
+}
+
+async function handleScreenshot(stream) {
+  const track = stream.getVideoTracks()[0];
+  const imageCapture = new ImageCapture(track);
+  const bitmap = await imageCapture.grabFrame();
+  track.stop();
+  return bitmap;
+}
